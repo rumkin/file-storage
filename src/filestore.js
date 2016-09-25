@@ -66,8 +66,12 @@ class FileStore {
         return this.blobStore.getStream(id);
     }
 
-    getUpdates(date) {
-        return this.dataStore.getUpdates(date);
+    listUpdated(date) {
+        return this.dataStore.listUpdated(date);
+    }
+
+    countUpdated(date) {
+        return this.dataStore.countUpdated(date);
     }
 }
 

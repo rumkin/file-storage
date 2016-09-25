@@ -6,6 +6,8 @@ const assert = require('assert');
 const nedb = require('nedb');
 const fetch = require('node-fetch');
 const uuid = require('node-uuid');
+const qs = require('querystring');
+const DEBUG = process.env.DEBUG === '1';
 
 describe('HTTP server', () => {
     var server, storage, dir, port;
@@ -36,7 +38,7 @@ describe('HTTP server', () => {
                 res.statusCode = 500;
                 res.statusText = 'Internal error';
                 res.end(err.message);
-                console.log('Error', err);
+                DEBUG && console.log(err);
             }
         })
         .listen();
@@ -76,5 +78,37 @@ describe('HTTP server', () => {
                 assert.equal(result, data, 'result is `Hello`');
             })
         );
+    });
+
+    it('Should return updates list and count', () => {
+        const id = uuid();
+        const data = new Buffer('Hello');
+        const url = `http://localhost:${port}/files/${id}`;
+        const date = new Date();
+
+        return fetch(url, {
+            method: 'POST',
+            headers: {
+                    'content-type': 'text/plain',
+                    'content-length': data.length,
+                    'content-disposition': 'attachment; filename=test',
+            },
+            body: data,
+        })
+        .then((res) => assert.equal(res.status, 200, 'Status is 200'))
+        .then(() => fetch(
+            `http://localhost:${port}/storage/updates?` + qs.stringify({after: date.toISOString()})
+        ))
+        .then((res) => {
+            assert.equal(res.status, 200, 'Status is 200');
+            assert.equal(res.headers.get('content-type'), 'application/json', 'Content type is JSON');
+
+            return res.json();
+        })
+        .then((result) => {
+            assert.equal(result.length, 1, '1 file updated');
+            assert.equal(result[0].name, 'test', 'Filename is `test`');
+        })
+        ;
     });
 });

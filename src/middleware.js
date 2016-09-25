@@ -1,7 +1,24 @@
 'use strict';
 
+const _ = require('lodash');
+const url = require('url');
+
 module.exports = function(router, filestore, logger) {
     const VERBOSE = !! logger;
+
+    router.use((req, res, next) => {
+        if (req.query) {
+            next();
+            return;
+        }
+
+        req._url = req.url;
+        req.parsedUrl = url.parse(req.url, true);
+        req.query = req.parsedUrl.query;
+        req.url = req.parsedUrl.pathname;
+
+        next();
+    });
 
     // Get file
     router.get('/files/:id', (req, res, next) => {
@@ -45,8 +62,9 @@ module.exports = function(router, filestore, logger) {
             var contentLength = req.headers['content-length'];
             var filename = req.headers['content-disposition'];
 
+
             if (filename) {
-                let match = filename.match(/^attachment;\s+filename=(.*)/);
+                let match = filename.match(/^attachment;\s+filename=(.+)/);
                 if (match) {
                     filename = match[1];
                     if (filename.charAt(0) === '"') {
@@ -59,7 +77,7 @@ module.exports = function(router, filestore, logger) {
             }
 
             var meta = {
-                // name: filename || '',
+                name: filename || '',
                 contentType,
                 contentLength,
             };
@@ -103,8 +121,37 @@ module.exports = function(router, filestore, logger) {
         .catch(next);
     });
 
-    // Stat routes
+    // Info routes
 
+    router.get('/storage/updates', (req, res, next) => {
+        var date = req.query.after || 0;
+
+        filestore.listUpdated(date)
+        .then((updates) => {
+            var result = JSON.stringify(updates.map(
+                (item) => _.pick(item, ['_id', 'isDeleted', 'updateDate', 'name'])
+            ));
+
+            res.setHeader('content-type', 'application/json');
+            res.setHeader('content-length', result.length);
+            res.end(result);
+        })
+        .catch(next);
+    });
+
+    router.get('/storage/updates/count', (req, res, next) => {
+        var date = req.query.after || 0;
+
+        filestore.countUpdated(date)
+        .then((count) => {
+            var result = JSON.stringify(count);
+
+            res.setHeader('content-type', 'application/json');
+            res.setHeader('content-length', result.length);
+            res.end(result);
+        })
+        .catch(next);
+    });
 
     return router;
 };
