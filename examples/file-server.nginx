@@ -1,0 +1,26 @@
+server {
+    listen 80;
+    server_name localhost;
+
+    access_log /projects/filestore/var/logs/access.log;
+    error_log /projects/filestore/var/logs/error.log;
+
+    location /auth {
+        internal;
+
+        proxy_pass "http://unix:/tmp/auth.sock";
+        proxy_method GET;
+        proxy_set_header Host $host;
+        proxy_pass_request_body off;
+        proxy_set_header Content-Length "";
+        proxy_set_header X-Original-Uri $request_uri;
+        proxy_set_header X-Original-Method $request_method;
+    }
+
+    location / {
+        auth_request /auth;
+
+        # Use unix socket to avoid direct access from network
+        proxy_pass "http://localhost:3333";
+    }
+}

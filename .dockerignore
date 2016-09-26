@@ -1,6 +1,7 @@
 node_modules
 .git
 tmp
+var
 .eslint
 .editorconfig
 .gitignore
@@ -9,3 +10,4 @@ tmp
 bake.sh
 changelog.sh
 todo.md
+example

@@ -1,0 +1,9 @@
+
+2016/09/26 22:35:07 [crit] 25086#25086: *1 connect() to unix:/tmp/auth.sock failed (13: Permission denied) while connecting to upstream, client: 127.0.0.1, server: localhost, request: "GET / HTTP/1.1", subrequest: "/auth", upstream: "http://unix:/tmp/auth.sock:/auth", host: "localhost"
+2016/09/26 22:35:07 [error] 25086#25086: *1 auth request unexpected status: 502 while sending to client, client: 127.0.0.1, server: localhost, request: "GET / HTTP/1.1", host: "localhost"
+2016/09/26 22:43:45 [error] 25086#25086: *6 connect() to unix:/tmp/auth.sock failed (111: Connection refused) while connecting to upstream, client: 127.0.0.1, server: localhost, request: "GET / HTTP/1.1", subrequest: "/auth", upstream: "http://unix:/tmp/auth.sock:/auth", host: "localhost"
+2016/09/26 22:43:45 [error] 25086#25086: *6 auth request unexpected status: 502 while sending to client, client: 127.0.0.1, server: localhost, request: "GET / HTTP/1.1", host: "localhost"
+2016/09/26 22:48:27 [error] 25713#25713: *4 open() "/usr/share/nginx/html/files/store" failed (2: No such file or directory) while sending to client, client: 127.0.0.1, server: localhost, request: "GET /files/store HTTP/1.1", host: "localhost"
+2016/09/26 22:53:35 [error] 25761#25761: *1 open() "/usr/share/nginx/html/files/store" failed (2: No such file or directory) while sending to client, client: 127.0.0.1, server: localhost, request: "GET /files/store HTTP/1.1", host: "localhost"
+2016/09/26 22:53:47 [error] 25761#25761: *3 open() "/usr/share/nginx/html/files/store" failed (2: No such file or directory) while sending to client, client: 127.0.0.1, server: localhost, request: "POST /files/store HTTP/1.1", host: "localhost"
+2016/09/26 22:54:55 [error] 25788#25788: *1 open() "/usr/share/nginx/html/files/store" failed (2: No such file or directory) while sending to client, client: 127.0.0.1, server: localhost, request: "POST /files/store HTTP/1.1", host: "localhost"

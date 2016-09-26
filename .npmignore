@@ -1,0 +1,10 @@
+var
+tmp
+.dockerignore
+.editorconfig
+.eslintrc
+.travis.yml
+bake.sh
+Dockerfile
+todo.md
+example
