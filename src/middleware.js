@@ -6,6 +6,7 @@ const url = require('url');
 module.exports = function(router, filestore, logger) {
     const VERBOSE = !! logger;
 
+    // Parse url query if it's not presented in request object.
     router.use((req, res, next) => {
         if (req.query) {
             next();
@@ -36,6 +37,13 @@ module.exports = function(router, filestore, logger) {
             .then(([meta, stream]) => {
                 res.setHeader('content-type', meta.contentType);
                 res.setHeader('content-length', meta.contentLength);
+
+                if (req.query.download) {
+                    res.setHeader(
+                        'content-disposition',
+                        `attachment; filename="${meta.name || id}"`
+                    );
+                }
 
                 VERBOSE && logger.log('Sent', id);
                 stream.pipe(res);
