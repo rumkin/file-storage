@@ -16,7 +16,8 @@ proxy server.
 
 Let's assume that you have authorization application on the port 3000 and file
 server on 4040. Nginx configuration example:
-```
+
+```nginx
 server {
     listen 80;
     server_name file-storage.your.domain;
@@ -26,27 +27,24 @@ server {
 
     location /auth {
         internal;
+
+        proxy_pass "http://localhost:3333";
         proxy_method GET;
-        proxy_set_header Content-Length "";
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header Host $host;
         proxy_pass_request_body off;
-        proxy_pass http://localhost:3000/auth/;
-        client_max_body_size 0;
+        proxy_set_header Content-Length "";
+
+        # Set original request values uri and method to make
+        # authorization though.
+        proxy_set_header X-Original-Uri $request_uri;
+        proxy_set_header X-Original-Method $request_method;
     }
 
-    location /files {
+    location / {
         auth_request /auth;
 
-        client_body_temp_path     /tmp;
-        client_body_in_file_only  on;
-        client_body_buffer_size   521K;
-        client_max_body_size      10G;
-
-        proxy_pass_request_headers on;
-        proxy_set_header X-FILE $request_body_file;
-        proxy_pass_request_body off;
-        proxy_set_header Content-Length 0;
-        proxy_pass http://127.0.0.1:4040;
+        # Use unix socket to avoid direct access from network
+        proxy_pass "http://unix:/var/file-store.sock";
     }
 }
 ```
