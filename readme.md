@@ -1,5 +1,7 @@
 # File storage
 
+![Build](https://img.shields.io/travis/rumkin/file-storage.svg)
+
 Multi-backend file storage with REST interface and synchronization. This file
 storage supports full REST only files manipulation put/delete and backup
 features.
@@ -120,6 +122,16 @@ HTTP/1.1 200 OK
 OK
 ```
 
+### GET /storage/dump
+
+List stored all items sorted by update date in descending order.
+
+Response is a gzipped JSON array.
+
+```
+GET /storage/dump
+```
+
 ### GET /storage/updates
 
 List storage updates since special date or from storage creation:
@@ -168,3 +180,8 @@ Response _body_:
 ## License
 
 MIT.
+
+
+## Credits
+
+Inspired by [Pavo](https://github.com/kavkaz/pavo) and [Hermitage](https://github.com/LiveTyping/hermitage-skeleton).
