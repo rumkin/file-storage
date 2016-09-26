@@ -23,7 +23,7 @@ task:cov() {
     npm run cov
 }
 
-task:test() {
+task:try() {
     local DIR=`mktemp -d`
     ./bin/cli.js $DIR &
     PID=$!
@@ -36,12 +36,10 @@ task:test() {
 
     sleep 1
 
-    local UUID=`uuidgen`
+    task:test_upload; echo ""
+    task:test_upload; echo ""
 
-    task:test_upload
-
-    curl "http://localhost:8080/storage/updates"
-    echo ""
+    curl -s "http://localhost:8080/storage/dump" | gunzip; echo ""
 
     rm -rf $DIR
 }

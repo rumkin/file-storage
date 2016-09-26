@@ -99,15 +99,58 @@ class NedbDataStorage {
         });
     }
 
+    find(query, {select, sort, skip, limit}) {
+        return new Promise((resolve, reject) => {
+            var cursor = this.db.find(query);
+
+            if (skip) {
+                cursor.skip(skip);
+            }
+
+            if (limit) {
+                cursor.limit(limit);
+            }
+
+            if (sort) {
+                cursor.sort({
+                    updateDate: -1,
+                });
+            }
+
+            if (select) {
+                cursor.projection(select);
+            }
+
+            cursor.exec((err, docs) => {
+                if (err) {
+                    reject(err);
+                }
+                else {
+                    resolve(docs);
+                }
+            });
+        });
+    }
+
+    count(query) {
+        return this._count(query);
+    }
+
     /**
      * List items updated after specified Database.
      *
      * @param {Date|Number} date Minimum update date
      * @return {Promise<Object[]>} Promise resolvs with array of updated documents.
      */
-    listUpdated(date) {
-        return this._find({
+    listUpdated(date, {skip, limit} = {}) {
+        return this.find({
             updateDate: {$gte: this._getDate(date)},
+        }, {
+            sort: {
+                updateDate: -1,
+            },
+            skip,
+            limit
         });
     }
 
@@ -129,7 +172,7 @@ class NedbDataStorage {
      * @return {Promise<Object[]>} Promise resolves with number of documents.
      */
     countUpdates(date) {
-        return this._count({
+        return this.count({
             updateDate: {$gte: this._getDate(date)},
         });
     }

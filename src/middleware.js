@@ -2,6 +2,8 @@
 
 const _ = require('lodash');
 const url = require('url');
+const {promiseSeries} = require('../lib/utils.js');
+const zlib = require('zlib');
 
 module.exports = function(router, filestore, logger) {
     const VERBOSE = !! logger;
@@ -78,6 +80,10 @@ module.exports = function(router, filestore, logger) {
                     if (filename.charAt(0) === '"') {
                         filename = filename.slice(1, -1);
                     }
+
+                    if (! filename.length) {
+                        filename = undefined;
+                    }
                 }
                 else {
                     filename = undefined;
@@ -137,7 +143,15 @@ module.exports = function(router, filestore, logger) {
         filestore.listUpdated(date)
         .then((updates) => {
             var result = JSON.stringify(updates.map(
-                (item) => _.pick(item, ['_id', 'isDeleted', 'updateDate', 'name'])
+                (item) => _.pick(item, [
+                    '_id',
+                    'isDeleted',
+                    'updateDate',
+                    'createDate',
+                    'contentType',
+                    'contentLength',
+                    'name',
+                ])
             ));
 
             res.setHeader('content-type', 'application/json');
@@ -157,6 +171,62 @@ module.exports = function(router, filestore, logger) {
             res.setHeader('content-type', 'application/json');
             res.setHeader('content-length', result.length);
             res.end(result);
+        })
+        .catch(next);
+    });
+
+    router.get('/storage/dump', (req, res, next) => {
+        filestore.countMeta()
+        .then((count) => {
+            if (! count) {
+                res.end('[]');
+                return;
+            }
+
+            var skip = 0;
+            var limit = 1000;
+            var gzip = zlib.createGzip();
+
+            res.setHeader('content-type', 'application/json');
+            res.setHeader('content-encoding', 'gzip');
+            gzip.pipe(res);
+
+            // Start sending an array
+            gzip.write('[\n');
+
+            return promiseSeries(
+                () => skip < count,
+                () => filestore.findMeta({}, {skip, limit})
+                .then((items) => {
+                    skip += Math.min(limit, items.length);
+
+                    // Convert items to JSON strings
+                    var result = items.map((item) =>
+                        JSON.stringify(_.pick(item, [
+                            '_id',
+                            'isDeleted',
+                            'updateDate',
+                            'createDate',
+                            'contentType',
+                            'contentLength',
+                            'name',
+                        ]))
+                    ).join(',\n');
+
+                    // Append final comma if not a last chunk
+                    if (skip < count) {
+                        result += ',';
+                    }
+
+                    // Write gzip data
+
+                    gzip.write(result + '\n');
+                })
+            )
+            .then(() => {
+                gzip.write(']');
+                gzip.end();
+            });
         })
         .catch(next);
     });

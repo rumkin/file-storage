@@ -58,6 +58,14 @@ class FileStore {
         return this.dataStore.get(id);
     }
 
+    findMeta(query, params = {}) {
+        return this.dataStore.find(query, params);
+    }
+
+    countMeta(query, params = {}) {
+        return this.dataStore.count(query, params);
+    }
+
     getBlob(id) {
         return this.globStorage.get(id);
     }
