@@ -42,9 +42,11 @@ class FileStore {
     }
 
     setDeleted(id) {
-        return Promise.all([
-            this.dataStore.setDeleted(id),
-        ]);
+        return this.dataStore.setDeleted(id);
+    }
+
+    setAccessDate(id, date) {
+        return this.dataStore.setAccessDate(id, date);
     }
 
     getStream(id) {
@@ -58,8 +60,8 @@ class FileStore {
         return this.dataStore.get(id);
     }
 
-    findMeta(query, params = {}) {
-        return this.dataStore.find(query, params);
+    listMeta(skip, limit) {
+        return this.dataStore.find(skip, limit);
     }
 
     countMeta(query, params = {}) {

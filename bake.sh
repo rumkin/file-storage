@@ -28,7 +28,7 @@ task:try() {
     ./bin/cli.js $DIR &
     PID=$!
 
-    function finish {
+    finish() {
         kill -s 9 $PID
     }
 
@@ -39,7 +39,7 @@ task:try() {
     task:test_upload; echo ""
     task:test_upload; echo ""
 
-    curl -s "http://localhost:8080/storage/dump" | gunzip; echo ""
+    curl -s "http://localhost:8080/storage/dump" ; echo ""
 
     rm -rf $DIR
 }

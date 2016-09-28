@@ -77,6 +77,16 @@ describe('HTTP server', () => {
             .then((result) => {
                 assert.equal(result, data, 'result is `Hello`');
             })
+            .then(() => fetch(
+                `http://localhost:${port}/storage/dump`
+            ))
+            .then((res) => res.json())
+            .then((items) => {
+                var item = items[0];
+
+                assert.ok(item._id === id, 'Item exists');
+                assert.ok(item.accessDate !== null, 'Access date is set');
+            })
         );
     });
 

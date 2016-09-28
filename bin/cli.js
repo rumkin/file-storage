@@ -43,7 +43,7 @@ const logger = VERBOSE
     : null;
 
 connect()
-.use(middleware(router, storage, logger))
+.use(middleware(router, storage, logger, DEBUG))
 .use((err, req, res, next) => {
     if (! err) {
         res.statusCode = 404;

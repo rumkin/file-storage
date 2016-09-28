@@ -5,8 +5,9 @@ const url = require('url');
 const {promiseSeries} = require('../lib/utils.js');
 const zlib = require('zlib');
 
-module.exports = function(router, filestore, logger) {
+module.exports = function(router, filestore, logger, debug) {
     const VERBOSE = !! logger;
+    const DEBUG = !! debug;
 
     // Parse url query if it's not presented in request object.
     router.use((req, res, next) => {
@@ -49,6 +50,9 @@ module.exports = function(router, filestore, logger) {
 
                 VERBOSE && logger.log('Sent', id);
                 stream.pipe(res);
+
+                filestore.setAccessDate(id, new Date())
+                .catch((error) => DEBUG && console.error(error));
             });
         })
         .catch(next);
@@ -148,6 +152,7 @@ module.exports = function(router, filestore, logger) {
                     'isDeleted',
                     'updateDate',
                     'createDate',
+                    'accessDate',
                     'contentType',
                     'contentLength',
                     'name',
@@ -185,18 +190,27 @@ module.exports = function(router, filestore, logger) {
 
             var skip = 0;
             var limit = 1000;
-            var gzip = zlib.createGzip();
+            var output = res;
 
             res.setHeader('content-type', 'application/json');
-            res.setHeader('content-encoding', 'gzip');
-            gzip.pipe(res);
+
+            // If accept gzipped.
+            if ('accept-encoding' in req.headers) {
+                let accept = req.headers['accept-encoding'];
+                if (accept.includes('gzip')) {
+                    res.setHeader('content-encoding', 'gzip');
+                    let gzip = zlib.createGzip();
+                    gzip.pipe(res);
+                    output = gzip;
+                }
+            }
 
             // Start sending an array
-            gzip.write('[\n');
+            output.write('[\n');
 
             return promiseSeries(
                 () => skip < count,
-                () => filestore.findMeta({}, {skip, limit})
+                () => filestore.listMeta(skip, limit)
                 .then((items) => {
                     skip += Math.min(limit, items.length);
 
@@ -207,6 +221,7 @@ module.exports = function(router, filestore, logger) {
                             'isDeleted',
                             'updateDate',
                             'createDate',
+                            'accessDate',
                             'contentType',
                             'contentLength',
                             'name',
@@ -219,13 +234,12 @@ module.exports = function(router, filestore, logger) {
                     }
 
                     // Write gzip data
-
-                    gzip.write(result + '\n');
+                    output.write(result + '\n');
                 })
             )
             .then(() => {
-                gzip.write(']');
-                gzip.end();
+                output.write(']');
+                output.end();
             });
         })
         .catch(next);
