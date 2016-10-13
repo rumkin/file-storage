@@ -1,0 +1,10 @@
+[Unit]
+Description=File Store Application
+
+[Service]
+Restart=always
+Type=simple
+ExecStart=/usr/bin/env node file-store /var/data/file-store/ --port=/var/run/file-store.sock
+
+[Install]
+WantedBy=default.target
