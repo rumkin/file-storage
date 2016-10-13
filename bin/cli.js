@@ -20,7 +20,7 @@ const config = argentum.parse(argv, {
         port: process.env.PORT || 8080,
         debug: process.env.DEBUG === '1',
         verbose: process.env.VERBOSE === '1',
-        pidFile: process.env.PID_FILE || '/var/run/file-store.pid'
+        pidFile: process.env.PID_FILE || '/var/run/file-store.pid',
     },
 });
 
