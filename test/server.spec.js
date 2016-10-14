@@ -46,7 +46,7 @@ describe('HTTP server', () => {
         port = server.address().port;
     });
 
-    it('Should post and get file', () => {
+    it('Should post, get and head file', () => {
         const id = uuid();
         const data = new Buffer('Hello');
         const url = `http://localhost:${port}/files/${id}`;
@@ -66,6 +66,10 @@ describe('HTTP server', () => {
             var filepath = storage.blobStore.getFilepath(id);
 
             assert.ok(fs.existsSync(filepath), 'File created');
+        })
+        .then(() => fetch(url, {method: 'HEAD'}))
+        .then((res) => {
+            assert.equal(res.status, 200, 'Status is 200');
         })
         .then(() => fetch(url)
             .then((res) => {

@@ -89,6 +89,24 @@ HTTP/1.1 200 OK
 OK
 ```
 
+### HEAD /files/:id
+
+Check file exists or not. This method return's no body but meta data only.
+
+Request:
+
+```
+HEAD /files/7211bef2-6856-4a18-9359-5a0373e5b8c1
+```
+
+
+Response:
+```
+HTTP/1.1 200 OK
+Content-Length: 5
+Content-Type: text/plain
+```
+
 ### GET /storage/dump
 
 List stored all items sorted by update date in descending order.
