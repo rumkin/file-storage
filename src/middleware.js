@@ -38,6 +38,12 @@ module.exports = function(router, filestore, logger, debug) {
 
             return filestore.getStream(id)
             .then(([meta, stream]) => {
+                if (meta.isDeleted) {
+                    res.writeHead(403, 'Deleted');
+                    res.end();
+                    return;
+                }
+                
                 res.setHeader('content-type', meta.contentType);
                 res.setHeader('content-length', meta.contentLength);
 
@@ -53,6 +59,36 @@ module.exports = function(router, filestore, logger, debug) {
 
                 filestore.setAccessDate(id, new Date())
                 .catch((error) => DEBUG && console.error(error));
+            });
+        })
+        .catch(next);
+    });
+
+    // Get file status
+    router.head('/files/:id', (req, res, next) => {
+        const id = req.params.id;
+
+        filestore.has(id)
+        .then((status) => {
+            if (! status) {
+                next();
+                return;
+            }
+
+
+            return filestore.getMeta(id)
+            .then((meta) => {
+                if (meta.isDeleted) {
+                    res.writeHead(403, 'Deleted');
+                    res.end();
+                    return;
+                }
+
+                res.setHeader('content-type', meta.contentType);
+                res.setHeader('content-length', meta.contentLength);
+                res.end();
+
+                VERBOSE && logger.log('Check', id);
             });
         })
         .catch(next);

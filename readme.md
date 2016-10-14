@@ -12,10 +12,18 @@ File storage could be used via docker container `rumkin/file-storage` or
 with manual installation. But note that it should be run behind authorization
 proxy server.
 
+Run with TCP port:
+
+```
+$ docker run -d --name fs -p 3333:8080 -v /var/data/file-store:/data rumkin/file-store
+```
+
+
+
 ### Nginx usage example
 
-Let's assume that you have authorization application on the port 3000 and file
-server on 4040. Nginx configuration example:
+Let's assume that you have authorization application on the port 3333 and file
+server on unix socket `/var/file-store.sock`. Nginx configuration example:
 
 ```nginx
 server {

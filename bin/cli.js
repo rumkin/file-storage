@@ -43,6 +43,10 @@ const logger = VERBOSE
     : null;
 
 connect()
+.use((req, res, next) => {
+    VERBOSE && console.log(req.method, req.url);
+    next();
+})
 .use(middleware(router, storage, logger, DEBUG))
 .use((err, req, res, next) => {
     if (! err) {
