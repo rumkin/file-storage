@@ -57,6 +57,7 @@ describe('HTTP server', () => {
                     'content-type': 'text/plain',
                     'content-length': data.length,
                     'content-disposition': 'attachment; filename=test',
+                    'x-tags': 'test, file',
             },
             body: data,
         })

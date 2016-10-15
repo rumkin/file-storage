@@ -37,6 +37,7 @@ POST /files/7211bef2-6856-4a18-9359-5a0373e5b8c1
 Content-Type: text/plain
 Content-Length: 5
 Content-Disposition: attachment; filename=hello.txt
+X-Tags: test, file
 
 Hello
 ```
@@ -67,6 +68,7 @@ HTTP/1.1 200 OK
 Content-Type: text/plain
 Content-Length: 5
 Content-Disposition: attachment; filename=hello.txt
+X-Tags: test, file
 
 Hello
 ```

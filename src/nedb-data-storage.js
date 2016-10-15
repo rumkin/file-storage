@@ -1,5 +1,6 @@
 const pify = require('pify');
 const {defineConst} = require('../lib/utils.js');
+const _ = require('lodash');
 
 class NedbDataStorage {
     constructor({db} = {}) {
@@ -27,12 +28,23 @@ class NedbDataStorage {
     put(id, data) {
         // TODO Validate data object
         // Append default fields
-        return this._insert(Object.assign({}, data, {
+        return this._insert(_.merge({}, _.pick(data, [
+            '_id',
+            'name',
+            'contentType',
+            'contentLength',
+            'isDeleted',
+            'createDate',
+            'updateDate',
+            'accessDate',
+            'tags',
+        ]), {
             _id: id,
             isDeleted: false,
             createDate: new Date(),
             updateDate: new Date(),
             accessDate: null,
+            tags: [],
         }));
     }
 

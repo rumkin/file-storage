@@ -43,9 +43,12 @@ module.exports = function(router, filestore, logger, debug) {
                     res.end();
                     return;
                 }
-                
+
                 res.setHeader('content-type', meta.contentType);
                 res.setHeader('content-length', meta.contentLength);
+                if (meta.tags.length) {
+                    res.setHeader('x-tags', meta.tags.join(', '));
+                }
 
                 if (req.query.download) {
                     res.setHeader(
@@ -86,6 +89,9 @@ module.exports = function(router, filestore, logger, debug) {
 
                 res.setHeader('content-type', meta.contentType);
                 res.setHeader('content-length', meta.contentLength);
+                if (meta.tags.length) {
+                    res.setHeader('x-tags', meta.tags.join(', '));
+                }
                 res.end();
 
                 VERBOSE && logger.log('Check', id);
@@ -111,7 +117,7 @@ module.exports = function(router, filestore, logger, debug) {
             var contentType = req.headers['content-type'];
             var contentLength = req.headers['content-length'];
             var filename = req.headers['content-disposition'];
-
+            var tags = req.headers['x-tags'];
 
             if (filename) {
                 let match = filename.match(/^attachment;\s+filename=(.+)/);
@@ -130,10 +136,15 @@ module.exports = function(router, filestore, logger, debug) {
                 }
             }
 
+            if (tags) {
+                tags = tags.split(/\s*,\s*/);
+            }
+
             var meta = {
                 name: filename || '',
                 contentType,
                 contentLength,
+                tags,
             };
 
             return filestore.put(id, meta, req)

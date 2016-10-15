@@ -20,6 +20,7 @@ describe('NedbDataStorage', () => {
         return storage.put(id, {
             contentType: 'text/plain',
             contentLength: 1,
+            tags: ['test'],
         })
         .then((result) => {
             assert.equal(typeof result, 'object', 'result is object');
@@ -29,11 +30,14 @@ describe('NedbDataStorage', () => {
                 'contentType',
                 'createDate',
                 'updateDate',
+                'accessDate',
                 'isDeleted',
+                'tags',
             ]
             .forEach((prop) => {
                 assert.ok(result.hasOwnProperty(prop), `result has \`${prop}\``);
             });
+            assert.deepEqual(result.tags, ['test'], 'Tags returned');
         });
     });
 
@@ -43,6 +47,7 @@ describe('NedbDataStorage', () => {
         return storage.put(id, {
             contentType: 'text/plain',
             contentLength: 1,
+            tags: ['test'],
         })
         .then(() => storage.get(id))
         .then((result) => {
@@ -53,11 +58,14 @@ describe('NedbDataStorage', () => {
                 'contentType',
                 'createDate',
                 'updateDate',
+                'accessDate',
                 'isDeleted',
+                'tags',
             ]
             .forEach((prop) => {
                 assert.ok(result.hasOwnProperty(prop), `result has \`${prop}\``);
             });
+            assert.deepEqual(result.tags, ['test'], 'Tags returned');
         });
     });
 
