@@ -170,7 +170,7 @@ Response _body_:
 ### Nginx usage example
 
 Let's assume that you have authorization application on the port 3333 and file
-server on unix socket `/var/file-store.sock`. Nginx configuration example:
+server on unix socket `/var/run/file-storage.sock`. Nginx configuration example:
 
 ```nginx
 server {
@@ -199,7 +199,7 @@ server {
         auth_request /auth;
 
         # Use unix socket to avoid direct access from network
-        proxy_pass "http://unix:/var/file-store.sock";
+        proxy_pass "http://unix:/var/run/file-storage.sock";
     }
 }
 ```
