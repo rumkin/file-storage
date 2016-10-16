@@ -19,8 +19,8 @@ class FileStore {
             throw new Error('Meta should be an object');
         }
 
-        return this.dataStore.put(id, meta)
-        .then(() => this.blobStore.put(id, content));
+        return this.blobStore.put(id, content)
+        .then(() => this.dataStore.put(id, meta));
     }
 
     has(id) {
