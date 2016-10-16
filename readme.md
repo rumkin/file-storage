@@ -107,6 +107,7 @@ Response:
 HTTP/1.1 200 OK
 Content-Length: 5
 Content-Type: text/plain
+X-Tags: test, file
 ```
 
 ### GET /storage/dump
@@ -124,8 +125,9 @@ GET /storage/dump
 List storage updates since special date or from storage creation:
 
 Params:
-    * URL query params 'after' specifies date to filter changes. Could be
-    ISO 8601 or unix timestamp. Optional. Default is 0.
+
+* URL query params 'after' specifies date to filter changes. Could be
+  ISO 8601 or unix timestamp. Optional. Default is 0.
 
 Response is a JSON array.
 
@@ -150,8 +152,9 @@ Response _body_:
 Get count of updated files in db since specified date.
 
 Params:
-    * URL query params 'after' specifies date to filter changes. Could be
-    ISO 8601 or unix timestamp. Optional. Default is 0.
+
+* URL query params 'after' specifies date to filter changes. Could be
+  ISO 8601 or unix timestamp. Optional. Default is 0.
 
 Response is a JSON number.
 
