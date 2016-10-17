@@ -157,7 +157,7 @@ module.exports = function(router, filestore, logger, debug) {
     });
 
     // Delete file
-    router.delete('/files/:id', () => {
+    router.delete('/files/:id', (req, res, next) => {
         const id = req.params.id;
 
         filestore.has(id)
