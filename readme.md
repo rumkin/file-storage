@@ -25,10 +25,12 @@ $ docker run -d --name fs -p 4444:8080 -v /var/data/file-store:/data rumkin/file
 Add file to storage.
 
 Params:
-    * HTTP-header 'Content-Type' sets file mime type
-    * HTTP-header 'Content-Length' sets file length
-    * HTTP-header 'Content-Disposition' sets filename
-    * HTTP body sets body.
+
+* HTTP-header 'Content-Type' sets file mime type.
+* HTTP-header 'Content-Length' sets file length.
+* HTTP-header 'Content-Disposition' sets filename.
+* HTTP-header 'X-Tags' sets file data tags.
+* HTTP body sets file content.
 
 Request:
 
@@ -56,7 +58,7 @@ Get file from storage. If file was deleted returns 413.
 
 Params:
 
-    * URL query param 'download' adds content-disposition header into response. Optional.
+* URL query param 'download' adds content-disposition header into response. Optional.
 
 ```
 GET /files/7211bef2-6856-4a18-9359-5a0373e5b8c1?download
@@ -91,6 +93,7 @@ HTTP/1.1 200 OK
 OK
 ```
 
+
 ### HEAD /files/:id
 
 Check file exists or not. This method return's no body but meta data only.
@@ -101,7 +104,6 @@ Request:
 HEAD /files/7211bef2-6856-4a18-9359-5a0373e5b8c1
 ```
 
-
 Response:
 ```
 HTTP/1.1 200 OK
@@ -109,6 +111,7 @@ Content-Length: 5
 Content-Type: text/plain
 X-Tags: test, file
 ```
+
 
 ### GET /storage/dump
 
@@ -119,6 +122,7 @@ Response is a gzipped JSON array.
 ```
 GET /storage/dump
 ```
+
 
 ### GET /storage/updates
 
@@ -147,6 +151,7 @@ Response _body_:
 ]
 ```
 
+
 ### GET /storage/updates/count
 
 Get count of updated files in db since specified date.
@@ -167,7 +172,8 @@ Response _body_:
 1
 ```
 
-### Nginx usage example
+
+## Nginx usage example
 
 Let's assume that you have authorization application on the port 3333 and file
 server on unix socket `/var/run/file-storage.sock`. Nginx configuration example:
