@@ -82,7 +82,7 @@ module.exports = function(router, filestore, logger, debug) {
             return filestore.getMeta(id)
             .then((meta) => {
                 if (meta.isDeleted) {
-                    res.writeHead(403, 'Deleted');
+                    res.writeHead(413, 'Deleted');
                     res.end();
                     return;
                 }
