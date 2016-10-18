@@ -58,5 +58,11 @@ task:test_upload() {
 }
 
 task:build:docker() {
-    docker build -t "$1" Dockerfile
+    local VERSION=$2
+
+    docker build -t "$1" .
+    if [ -n "$VERSION" ]
+    then
+        docker tag "${1}:latest" "${1}:${VERSION}"
+    fi
 }
