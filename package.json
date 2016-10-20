@@ -6,7 +6,7 @@
   },
   "license": "MIT",
   "name": "filestore",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "Extensible filestorage ",
   "bin": {
     "filestore": "cli.js"

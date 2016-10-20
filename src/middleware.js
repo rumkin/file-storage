@@ -170,7 +170,7 @@ module.exports = function(router, filestore, logger, debug) {
             return storage.getMeta(id)
             .then((meta) => {
                 if (meta.isDeleted) {
-                    res.statusCode = 413;
+                    res.statusCode = 410;
                     res.statusText = 'File deleted';
                     res.end('Deleted');
                     return;
