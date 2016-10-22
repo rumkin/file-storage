@@ -28,11 +28,10 @@ describe('FsBlobStorage', () => {
         });
 
         it('It should put and get string', () => {
-            var id = uuid();
             var content = 'Hello';
 
-            return storage.put(id, content)
-            .then(() => storage.get(id))
+            return storage.put(content)
+            .then((id) => storage.get(id))
             .then((result) => {
                 assert.ok(result instanceof Buffer, 'Result is a buffer');
                 assert.equal(result, content, 'Data from storage is the same as written');
@@ -40,11 +39,10 @@ describe('FsBlobStorage', () => {
         });
 
         it('It should put stream and get buffer', () => {
-            var id = uuid();
             var content = new Buffer('Hello', 'utf-8');
 
-            return storage.put(id, content)
-            .then(() => storage.get(id))
+            return storage.put(content)
+            .then((id) => storage.get(id))
             .then((result) => {
                 assert.ok(result instanceof Buffer, 'Result is a buffer');
                 assert.equal(Buffer.compare(result, content), 0, 'Data from storage is the same as written');
@@ -52,7 +50,6 @@ describe('FsBlobStorage', () => {
         });
 
         it('It should put and get stream', () => {
-            var id = uuid();
             var content = new Buffer('Hello', 'utf-8');
 
             class Stream extends Readable {
@@ -74,8 +71,8 @@ describe('FsBlobStorage', () => {
 
             var stream = new Stream;
 
-            return storage.put(id, stream)
-            .then(() => storage.get(id))
+            return storage.put(stream)
+            .then((id) => storage.get(id))
             .then((result) => {
                 assert.ok(result instanceof Buffer, 'Result is a buffer');
                 assert.equal(Buffer.compare(result, content), 0, 'Data from storage is the same as written');
@@ -83,11 +80,10 @@ describe('FsBlobStorage', () => {
         });
 
         it('It should get stream', () => {
-            var id = uuid();
             var content = new Buffer('Hello', 'utf-8');
 
-            return storage.put(id, content)
-            .then(() => storage.getStream(id))
+            return storage.put(content)
+            .then((id) => storage.getStream(id))
             .then((stream) => {
                 assert.ok(stream instanceof Readable, 'Stream returned');
 
@@ -107,21 +103,20 @@ describe('FsBlobStorage', () => {
         });
 
         it('#has should return `true` when item exists', () => {
-            var id = uuid();
             var content = new Buffer('Hello', 'utf-8');
 
-            return storage.put(id, content)
-            .then(() => storage.has(id))
+            return storage.put(content)
+            .then((id) => storage.has(id))
             .then((result) => {
                 assert.ok(result, 'Item exists');
             });
         });
 
         it('#has should return `false` when item removed', () => {
-            var id = uuid();
             var content = new Buffer('Hello', 'utf-8');
-
-            return storage.put(id, content)
+            var id;
+            return storage.put(content)
+            .then((id_) => (id = id_))
             .then(() => storage.delete(id))
             .then(() => storage.has(id))
             .then((result) => {
@@ -130,11 +125,10 @@ describe('FsBlobStorage', () => {
         });
 
         it('Should write item on disk', () => {
-            var id = uuid();
             var content = new Buffer('Hello', 'utf-8');
 
-            return storage.put(id, content)
-            .then(() => {
+            return storage.put(content)
+            .then((id) => {
                 var filepath = storage.getFilepath(id);
 
                 assert.ok(fs.existsSync(filepath), 'File exists');
@@ -142,10 +136,10 @@ describe('FsBlobStorage', () => {
         });
 
         it('Should remove item from disk', () => {
-            var id = uuid();
             var content = new Buffer('Hello', 'utf-8');
-
-            return storage.put(id, content)
+            var id;
+            return storage.put(content)
+            .then((id_) => (id = id_))
             .then(() => storage.delete(id))
             .then(() => {
                 var filepath = storage.getFilepath(id);

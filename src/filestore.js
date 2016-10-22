@@ -19,30 +19,49 @@ class FileStore {
             throw new Error('Meta should be an object');
         }
 
-        return this.blobStore.put(id, content)
-        .then(() => this.dataStore.put(id, meta));
+        return this.blobStore.put(content)
+        .then((md5) => Object.assign({}, meta, {md5}))
+        .then((meta) => this.dataStore.put(id, meta).then(() => meta));
     }
 
     has(id) {
-        return this.blobStore.has(id);
+        return this.dataStore.has(id);
     }
 
     get(id) {
-        return Promise.all([
-            this.getMeta(id),
-            this.getBlob(id),
-        ]);
+        return this.getMeta(id)
+        .then((meta) => this.getBlob(meta.md5));
     }
 
     delete(id) {
-        return Promise.all([
-            this.dataStore.delete(id),
-            this.blobStore.delete(id),
-        ]);
+        return this.getMeta(id)
+        .then((meta) =>
+            this.dataStore.delete(id)
+            .then(() => this.dataStore.countBlobRefs(meta.md5))
+            .then((count) => {
+                if (count > 0) {
+                    return;
+                }
+
+                return this.blobStore.delete(meta.md5);
+            })
+        );
     }
 
     setDeleted(id) {
         return this.dataStore.setDeleted(id);
+        return this.getMeta(id)
+        .then((meta) =>
+            this.dataStore.setDeleted(id)
+            .then(() => this.dataStore.countBlobRefs(meta.md5))
+            .then((count) => {
+                if (count > 0) {
+                    return;
+                }
+
+                return this.blobStore.delete(meta.md5);
+            })
+        );
     }
 
     setAccessDate(id, date) {
@@ -50,14 +69,18 @@ class FileStore {
     }
 
     getStream(id) {
-        return Promise.all([
-            this.getMeta(id),
-            this.getBlobStream(id),
-        ]);
+        return this.getMeta(id)
+        .then((meta) => this.getBlobStream(meta.md5)
+        .then((stream) => [meta, stream]));
     }
 
     getMeta(id) {
-        return this.dataStore.get(id);
+        if (typeof id === 'object') {
+            return Promise.resolve(id);
+        }
+        else {
+            return this.dataStore.get(id);
+        }
     }
 
     listMeta(skip, limit) {

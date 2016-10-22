@@ -1,37 +1,55 @@
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
 const mkdirp = require('mkdirp');
 const pify = require('pify');
 const mkdirpP = pify(mkdirp);
 const writeFileP = pify(fs.writeFile);
 const readFileP = pify(fs.readFile);
-const unlinkP = pify(fs.unlink)
+const unlinkP = pify(fs.unlink);
+const renameP = pify(fs.rename);
 const statP = pify(fs.stat);
 const {Readable} = require('stream');
+const uuid = require('node-uuid');
 
 class FsBlobStorage {
-    constructor({dir = process.cwd(), depth = 3} = {}) {
+    constructor({dir = process.cwd(), tmp = '/tmp', depth = 3} = {}) {
         defineConst(this, 'dir', dir);
         defineConst(this, 'depth', depth);
+        this._tmp = tmp;
+    }
+
+    get tmp() {
+        return this._tmp;
     }
 
     /**
      * Put binary data into storage.
      *
-     * @param  {String} id Item id.
      * @param  {Buffer|Stream} content Data to store.
+     * @return {Promise<String>} Promise resolves with md5 of the content.
      * @return {Promise}
      */
-    put(id, content) {
+    put(content) {
         if (content instanceof Readable) {
-            return this.putStream(id, content);
+            return this.putStream(content);
         }
 
-        var dir = this.getDirpath(id);
+        var md5 = crypto.createHash('md5').update(content).digest('hex');
+        var dir = this.getDirpath(md5);
+        var filepath = this.getFilepath(md5);
 
-        return mkdirpP(dir)
-        .then(() => writeFileP(path.join(dir, id), content))
-        .then(() => id);
+        return existsP(filepath)
+        .then((exists) => {
+            if (exists) {
+                return md5;
+            }
+            else {
+                return mkdirpP(dir)
+                .then(() => writeFileP(filepath, content))
+                .then(() => md5);
+            }
+        });
     }
     /**
      * Get item value as Buffer.
@@ -46,28 +64,43 @@ class FsBlobStorage {
     }
     /**
      * Put file as a stream.
-     * @param  {String} id Item id.
      * @param {Stream.Readable} readStream Readable stream.
-     * @return {Promise} Result
+     * @return {Promise<String>} Promise resolves with md5 of the content.
      */
-    putStream(id, readStream) {
-        var filepath = this.getFilepath(id);
+    putStream(readStream) {
+        var tmpFile = this.tmpFilename();
 
-        return (new Promise(resolve => fs.exists(filepath, resolve)))
+        return existsP(tmpFile)
         .then(exists => {
             if (exists) {
                 throw new Error('File already exists');
             }
 
-            return mkdirpP(path.dirname(filepath))
-            .then(() => {
-                var writeStream = fs.createWriteStream(filepath);
-                return new Promise((resolve, reject) => {
-                    readStream.pipe(writeStream);
+            const hash = crypto.createHash('md5');
 
-                    writeStream.on('finish', resolve);
-                    writeStream.on('error', reject);
+            return new Promise((resolve, reject) => {
+                var writeStream = fs.createWriteStream(tmpFile);
+                readStream.pipe(writeStream);
+                readStream.on('data', (chunk) => hash.update(chunk));
+                writeStream.on('finish', () => {
+                    resolve(hash.digest('hex'));
                 });
+                writeStream.on('error', reject);
+            })
+            .then((md5) => {
+                var filepath = this.getFilepath(md5);
+
+                return existsP(filepath)
+                .then((exists) => {
+                    if (exists) {
+                        return unlinkP(tmpFile);
+                    }
+                    else {
+                        return mkdirpP(path.dirname(filepath))
+                        .then(() => renameP(tmpFile, filepath));
+                    }
+                })
+                .then(() => md5);
             });
         });
     }
@@ -136,6 +169,10 @@ class FsBlobStorage {
         return statP(
             this.getFilepath(id)
         );
+    }
+
+    tmpFilename() {
+        return path.join(this._tmp, uuid());
     }
 }
 

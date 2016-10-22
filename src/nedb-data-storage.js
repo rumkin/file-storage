@@ -31,6 +31,7 @@ class NedbDataStorage {
         return this._insert(_.merge({}, _.pick(data, [
             '_id',
             'name',
+            'md5',
             'contentType',
             'contentLength',
             'isDeleted',
@@ -222,6 +223,13 @@ class NedbDataStorage {
     countUpdates(date) {
         return this.count({
             updateDate: {$gte: this._getDate(date)},
+        });
+    }
+
+    countBlobRefs(md5) {
+        return this.count({
+            md5,
+            isDeleted: false,
         });
     }
 

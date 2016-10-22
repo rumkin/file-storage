@@ -46,6 +46,8 @@ module.exports = function(router, filestore, logger, debug) {
 
                 res.setHeader('content-type', meta.contentType);
                 res.setHeader('content-length', meta.contentLength);
+                res.setHeader('content-md5', meta.md5);
+
                 if (meta.tags.length) {
                     res.setHeader('x-tags', meta.tags.join(', '));
                 }
@@ -89,6 +91,8 @@ module.exports = function(router, filestore, logger, debug) {
 
                 res.setHeader('content-type', meta.contentType);
                 res.setHeader('content-length', meta.contentLength);
+                res.setHeader('content-md5', meta.md5);
+
                 if (meta.tags.length) {
                     res.setHeader('x-tags', meta.tags.join(', '));
                 }

@@ -63,14 +63,12 @@ describe('HTTP server', () => {
         })
         .then((res) => {
             assert.equal(res.status, 200, 'Status is 200');
-
-            var filepath = storage.blobStore.getFilepath(id);
-
-            assert.ok(fs.existsSync(filepath), 'File created');
         })
         .then(() => fetch(url, {method: 'HEAD'}))
         .then((res) => {
             assert.equal(res.status, 200, 'Status is 200');
+            var filepath = storage.blobStore.getFilepath(res.headers.get('content-md5'));
+            assert.ok(fs.existsSync(filepath), 'File created');
         })
         .then(() => fetch(url)
             .then((res) => {
