@@ -58,11 +58,15 @@ task:test_upload() {
 }
 
 task:build:docker() {
-    local VERSION=$2
+    # bake build:docker IMAGE [...VERSION]
+    local IMAGE=$1
 
-    docker build -t "$1" .
-    if [ -n "$VERSION" ]
-    then
-        docker tag "${1}:latest" "${1}:${VERSION}"
-    fi
+    shift 1
+
+    docker build -t "$IMAGE" . || exit 1
+
+    for V in "$@"
+    do
+        docker tag "$IMAGE:latest" "$IMAGE:$V"
+    done
 }
